@@ -5,7 +5,7 @@ from flask_login import UserMixin
 
 db = SQLAlchemy()
 
-class User(db.Model, UserMixin):  # Notice the added UserMixin
+class User(db.Model, UserMixin):  
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
     password_hash = db.Column(db.String(128))
@@ -14,13 +14,10 @@ class User(db.Model, UserMixin):  # Notice the added UserMixin
 
     @property
     def is_authenticated(self):
-        # Since we have a UserMixin, it provides a default implementation for this.
-        # But for clarity, you can return True here because if a user object exists, it's authenticated.
         return True
 
     @property
     def is_anonymous(self):
-        # Default to False for authenticated users.
         return False
 
     def get_id(self):
@@ -31,6 +28,9 @@ class User(db.Model, UserMixin):  # Notice the added UserMixin
 
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
+    
+   
+
 
     def serialize(self):
         return {
@@ -38,6 +38,9 @@ class User(db.Model, UserMixin):  # Notice the added UserMixin
             "username": self.username,
             "reviews": [review.serialize for review in self.reviews]
         }
+
+    
+    
 
 class Book(db.Model):
     id = db.Column(db.Integer, primary_key=True)

@@ -84,8 +84,16 @@ def index():
 
 @app.route('/profile')
 @login_required
-def profile():
+def user_profile():
     return jsonify(current_user.serialize)
+
+@app.route('/profile/<int:user_id>')
+def profile_by_id(user_id):
+    user = User.get_user_by_id(user_id)  # Call the method using the class name
+    if not user:
+        return "User not found", 404
+    return render_template('profile.html', user=user)
+
 
 
 
