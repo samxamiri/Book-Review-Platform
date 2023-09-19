@@ -39,7 +39,12 @@ def login():
             flash('Invalid credentials. Please try again.')
     return render_template('login.html')
 
-
+@app.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    flash('You have been logged out.')
+    return redirect(url_for('login'))
 
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -66,10 +71,10 @@ def register():
 
 
 
-@app.route('/landing')
+@app.route('/welcome')
 @login_required
 def welcome():
-    return render_template('landing.html')
+    return render_template('welcome.html')
 
 
 @app.route('/')
