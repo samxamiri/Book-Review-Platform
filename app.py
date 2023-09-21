@@ -78,14 +78,22 @@ def welcome():
 
 
 @app.route('/')
+def landing():
+    return render_template('landing.html')
+
+
+@app.route('/review')
 @login_required
-def index():
-    return render_template('index.html')
+def review():
+    return render_template('review.html')
 
 @app.route('/profile')
 @login_required
 def user_profile():
-    return jsonify(current_user.serialize)
+    # Assuming you have a relationship set up between User and Review
+    reviews = Review.query.filter_by(user_id=current_user.id).all()
+    read_books = {review.book for review in reviews}
+    return render_template('profile.html', read_books=read_books, reviews=reviews)
 
 @app.route('/profile/<int:user_id>')
 def profile_by_id(user_id):

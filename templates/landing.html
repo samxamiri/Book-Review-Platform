@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Book Review Central</title>
+    <style>
+      body {
+        font-family: "Arial", sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f4f4f4;
+      }
+
+      header {
+        background-color: #333;
+        color: #fff;
+        text-align: center;
+        padding: 60px 0;
+      }
+
+      section {
+        padding: 40px;
+      }
+
+      .featured {
+        display: flex;
+        justify-content: space-between;
+        gap: 20px;
+      }
+
+      .featured div {
+        flex-basis: calc(28%); /* Making the boxes smaller */
+        display: flex;
+        flex-direction: column;
+        padding: 20px;
+        background-color: #fff;
+        box-shadow: 0px 3px 10px rgba(0, 0, 0, 0.1);
+      }
+
+      .book-cover {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        height: 250px; /* Set a height to make sure all boxes are consistent */
+      }
+
+      .book-cover img {
+        max-width: 100%;
+        max-height: 100%;
+      }
+
+      .book-review {
+        margin-top: 20px;
+      }
+
+      .cta {
+        text-align: center;
+        background-color: #333;
+        color: #fff;
+        padding: 60px 0;
+      }
+
+      .cta a {
+        padding: 10px 20px;
+        background-color: #ff6347;
+        color: #fff;
+        text-decoration: none;
+        border-radius: 5px;
+        transition: background-color 0.3s;
+      }
+
+      .cta a:hover {
+        background-color: #ff4500;
+      }
+
+      footer {
+        background-color: #222;
+        color: #bbb;
+        text-align: center;
+        padding: 20px 0;
+      }
+    </style>
+  </head>
+
+  <body>
+    <header>
+      <h1>Book Review Central</h1>
+      <p>Your go-to place for insightful book reviews!</p>
+    </header>
+
+    <section>
+      <h2>Featured Reviews</h2>
+      <div class="featured">
+        <!-- Mockingbird Review -->
+        <div>
+          <div class="book-cover">
+            <img
+              src="{{ url_for('static', filename='killbird-cover.webp') }}"
+              alt="To Kill a Mockingbird Cover"
+            />
+          </div>
+          <div class="book-review">
+            <h3>To Kill a Mockingbird</h3>
+            <p>
+              "Lee's masterpiece unravels the dark tapestry of racism in the
+              American South. Through Scout's innocent eyes, witness courage and
+              prejudice collide."
+            </p>
+            <p><i>-GPT-4</i></p>
+          </div>
+        </div>
+        <!-- 1984 Review -->
+        <div>
+          <div class="book-cover">
+            <img
+              src="{{ url_for('static', filename='1984.jpg') }}"
+              alt="1984 cover"
+            />
+          </div>
+          <div class="book-review">
+            <h3>1984</h3>
+            <p>
+              "Orwell's haunting vision of a future where every thought is
+              watched. A chilling reminder that 'Big Brother' could be closer
+              than we think."
+            </p>
+            <p><i>-GPT-4</i></p>
+          </div>
+        </div>
+        <!-- Great Gatsby Review -->
+        <div>
+          <div class="book-cover">
+            <img
+              src="{{ url_for('static', filename='greatgatsby.avif') }}"
+              alt="Great Gatsby Cover"
+            />
+          </div>
+          <div class="book-review">
+            <h3>Great Gatsby</h3>
+            <p>
+              "Fitzgerald's shimmering tale of obsession, ambition, and the
+              American Dream. Dive into the roaring twenties and discover what
+              glitters isn't always gold."
+            </p>
+            <p><i>-GPT-4</i></p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="cta">
+      <h2>Join the Community</h2>
+      <p>Share your thoughts and explore reviews by other book enthusiasts.</p>
+      <a href="{{ url_for('login') }}">Write a Review</a>
+    </section>
+
+    <footer>
+      <p>&copy; 2023 Book Review Central. All Rights Reserved.</p>
+    </footer>
+  </body>
+</html>

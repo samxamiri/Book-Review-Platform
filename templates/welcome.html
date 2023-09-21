@@ -72,7 +72,9 @@
   <h1>Welcome to the Book Review Website</h1>
   <p>We're glad to have you here, {{ current_user.username }}!</p>
 
+  <!-- Added Review Link -->
+  <a href="{{ url_for('review') }}" class="profile-btn">Write A Review</a>
   <!-- Added Profile Link -->
-  <a href="/profile/{{ current_user.id }}" class="profile-btn">View Profile</a>
+  <a href="{{ url_for('user_profile') }}" class="profile-btn">View Profile</a>
 </div>
 {% endblock %}

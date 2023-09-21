@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>3x3 Grid</title>
+    <style>
+      /* Container for the grid */
+      .grid-container {
+        display: grid;
+        grid-template-columns: repeat(3, 500px);
+        grid-gap: 10px;
+        justify-content: center;
+      }
+
+      /* Each square item */
+      .grid-item {
+        width: 500px;
+        height: 500px;
+        border: 1px solid black;
+        background-color: #f4f4f4; /* light gray background */
+      }
+
+      .header {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="header">
+      <h1>Books Reviewed</h1>
+    </div>
+
+    <div class="grid-container">
+      <div class="grid-item"></div>
+      <div class="grid-item"></div>
+      <div class="grid-item"></div>
+      <div class="grid-item"></div>
+      <div class="grid-item"></div>
+      <div class="grid-item"></div>
+      <div class="grid-item"></div>
+      <div class="grid-item"></div>
+      <div class="grid-item"></div>
+    </div>
+  </body>
+</html>
