@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Book Search</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  </head>
+  <body>
+    <div class="search-container">
+      <input type="text" id="search-input" placeholder="Search for a book..." />
+      <div id="results-dropdown" class="results-dropdown"></div>
+    </div>
+  </body>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      document
+        .querySelector("#search-input")
+        .addEventListener("input", function () {
+          const query = this.value.trim();
+
+          // Clear the dropdown if the input is empty
+          if (query.length === 0) {
+            document.querySelector("#results-dropdown").innerHTML = "";
+            return;
+          }
+
+          fetch("/search_books", {
+            method: "POST",
+            body: new URLSearchParams({ query: query }),
+            headers: {
+              "Content-Type": "application/x-www-form-urlencoded",
+            },
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              let resultHTML = "";
+              data.forEach((book) => {
+                resultHTML += `<li>${book.title} by ${book.authors.join(
+                  ", "
+                )}</li>`;
+              });
+              document.querySelector("#results-dropdown").innerHTML =
+                resultHTML;
+            })
+            .catch((error) => console.error("Error:", error));
+        });
+    });
+  </script>
+</html>
