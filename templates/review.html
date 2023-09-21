@@ -1,51 +1,85 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+<head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Book Search</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-  </head>
-  <body>
+    <style>
+        #results-dropdown {
+            border: 1px solid #ddd;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        #results-dropdown li {
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+
+        #results-dropdown li:hover {
+            background-color: #f7f7f7;
+        }
+    </style>
+</head>
+<body>
     <div class="search-container">
       <input type="text" id="search-input" placeholder="Search for a book..." />
       <div id="results-dropdown" class="results-dropdown"></div>
     </div>
-  </body>
+    <div id="selected-book">
+      <img id="book-cover" src="" alt="Book Cover" style="display: none" />
+      <textarea
+        id="review-box"
+        placeholder="Write your review..."
+        style="display: none"
+      ></textarea>
+    </div>
 
-  <script>
-    document.addEventListener("DOMContentLoaded", function () {
-      document
-        .querySelector("#search-input")
-        .addEventListener("input", function () {
-          const query = this.value.trim();
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            document.querySelector("#search-input")
+                .addEventListener("input", function () {
+                    const query = this.value.trim();
 
-          // Clear the dropdown if the input is empty
-          if (query.length === 0) {
-            document.querySelector("#results-dropdown").innerHTML = "";
-            return;
-          }
+                    // Clear the dropdown if the input is empty
+                    if (query.length === 0) {
+                        document.querySelector("#results-dropdown").innerHTML = "";
+                        return;
+                    }
 
-          fetch("/search_books", {
-            method: "POST",
-            body: new URLSearchParams({ query: query }),
-            headers: {
-              "Content-Type": "application/x-www-form-urlencoded",
-            },
-          })
-            .then((response) => response.json())
-            .then((data) => {
-              let resultHTML = "";
-              data.forEach((book) => {
-                resultHTML += `<li>${book.title} by ${book.authors.join(
-                  ", "
-                )}</li>`;
-              });
-              document.querySelector("#results-dropdown").innerHTML =
-                resultHTML;
-            })
-            .catch((error) => console.error("Error:", error));
+                    fetch(`https://www.googleapis.com/books/v1/volumes?q=${query}&key=AIzaSyBhwpZmk-SM4Ex_AGk4twmgIUHGNWrrYNg`)
+                        .then((response) => response.json())
+                        .then((data) => {
+                            let resultHTML = "";
+                            if (data.items) {
+                                data.items.forEach((item) => {
+                                    const book = item.volumeInfo;
+                                    const coverImage = book.imageLinks?.thumbnail;
+                                    resultHTML += `
+                                        <li data-cover="${coverImage}" class="book-item">
+                                            ${book.title} by ${book.authors?.join(", ")}
+                                        </li>`;
+                                });
+                            }
+                            document.querySelector("#results-dropdown").innerHTML = resultHTML;
+                        })
+                        .catch((error) => console.error("Error:", error));
+
+                });
+
+            // Event Delegation for selecting book
+            document.querySelector("#results-dropdown").addEventListener("click", function (event) {
+                if (event.target.classList.contains("book-item")) {
+                    const coverURL = event.target.getAttribute("data-cover");
+                    const bookCover = document.querySelector("#book-cover");
+                    const reviewBox = document.querySelector("#review-box");
+
+                    bookCover.src = coverURL || "default-image-path.jpg"; // Fallback to default image if coverURL is null
+                    bookCover.style.display = "block";
+                    reviewBox.style.display = "block";
+                }
+            });
         });
-    });
-  </script>
+    </script> 
 </html>
