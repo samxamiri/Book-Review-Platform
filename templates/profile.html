@@ -8,7 +8,7 @@
       /* Container for the grid */
       .grid-container {
         display: grid;
-        grid-template-columns: repeat(3, 500px);
+        grid-template-columns: repeat(3, 100px);
         grid-gap: 10px;
         justify-content: center;
       }
@@ -27,6 +27,24 @@
         align-items: center;
       }
     </style>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        // Fetch the user's reviews from the server and display them
+        fetch("getReviews.php")
+          .then((response) => response.json())
+          .then((data) => {
+            const gridContainer = document.querySelector("#grid-container");
+
+            data.reviews.forEach((review) => {
+              const newCover = document.createElement("img");
+              newCover.src = review.cover;
+              newCover.alt = "Reviewed Book Cover";
+              gridContainer.appendChild(newCover);
+            });
+          });
+      });
+    </script>
   </head>
 
   <body>

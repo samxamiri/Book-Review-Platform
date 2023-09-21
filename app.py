@@ -147,10 +147,13 @@ def user_profile():
 
 @app.route('/profile/<int:user_id>')
 def profile_by_id(user_id):
-    user = User.get_user_by_id(user_id)  # Call the method using the class name
+    user = User.query.get(user_id)
     if not user:
         return "User not found", 404
-    return render_template('profile.html', user=user)
+    reviews = Review.query.filter_by(user_id=user.id).all()
+    read_books = {review.book for review in reviews}
+    return render_template('profile.html', user=user, read_books=read_books, reviews=reviews)
+
 
 
 
@@ -174,19 +177,23 @@ def add_book():
 
 @app.route('/save_book', methods=['POST'])
 def save_book():
-    google_book_id = request.form.get('google_book_id')  # Assuming you send this ID from the frontend
+    google_book_id = request.form.get('google_book_id')
     book_details = fetch_book_details_from_google(google_book_id)
 
     if not book_details:
         flash('Error fetching book details from Google Books.')
         return redirect(url_for('review'))
 
-    existing_book = Book.query.filter_by(title=book_details['title']).first()
+    existing_book = Book.query.filter_by(google_book_id=google_book_id).first()
     if existing_book:
         flash('Book already exists in the database.')
         return redirect(url_for('review'))
 
-    new_book = Book(title=book_details['title'], author=book_details['author'])
+    new_book = Book(
+        title=book_details['title'], 
+        author=book_details['author'],
+        google_book_id=google_book_id
+    )
     # Add other details as necessary
     db.session.add(new_book)
     db.session.commit()
@@ -196,7 +203,7 @@ def save_book():
 
 
 
-#Adds a review for a specific book in your database
+
 @app.route('/book/<int:book_id>/review', methods=['POST'])
 def add_review(book_id):
     book = Book.query.get(book_id)
@@ -204,7 +211,7 @@ def add_review(book_id):
         return jsonify({'message': 'Book not found'}), 404
     text = request.json.get('text')
     rating = request.json.get('rating')
-    review = Review(text=text, rating=rating, book_id=book_id)
+    review = Review(text=text, rating=rating, user_id=current_user.id, book_id=book_id)
     db.session.add(review)
     db.session.commit()
     return jsonify(review.serialize), 201
@@ -252,6 +259,35 @@ def search_books_route():
         unique_books[identifier] = book  # Storing the book with the unique identifier
 
     return jsonify(list(unique_books.values()))
+
+@app.route('/submitReview', methods=['POST'])
+@login_required
+def submit_review():
+    data = request.get_json()
+    
+    # Extract google_book_id and review content from the received data
+    google_book_id_from_request = data.get('google_book_id')
+    review_content = data.get('review')
+    
+    # Print the received google_book_id for debugging purposes
+    print(f"Received google_book_id: {google_book_id_from_request}")
+
+    # Check if the book exists in the database using the received google_book_id
+    book = Book.query.filter_by(google_book_id=google_book_id_from_request).first()
+    
+    # If the book is not found in the database, print a message and return a 400 error
+    if not book:
+        print(f"No book found with google_book_id: {google_book_id_from_request}")
+        return jsonify({"success": False, "message": "Book not found!"}), 400
+
+    # Create a new review for the found book
+    review = Review(content=review_content, user_id=current_user.id, book_id=book.id)
+    db.session.add(review)
+    db.session.commit()
+
+    return jsonify({"success": True, "message": "Review successfully added!"})
+
+
 
 
 

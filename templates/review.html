@@ -20,6 +20,14 @@
         #results-dropdown li:hover {
             background-color: #f7f7f7;
         }
+
+        #book-cover {
+    width: 300px; /* Adjust this as needed */
+    height: auto; /* Keep this as auto to maintain aspect ratio */
+    margin-top: 20px; /* Optional: adds some space between the search bar and the image */
+    border: 1px solid #ddd; /* Optional: adds a light border around the image */
+}
+
     </style>
 </head>
 <body>
@@ -27,59 +35,123 @@
       <input type="text" id="search-input" placeholder="Search for a book..." />
       <div id="results-dropdown" class="results-dropdown"></div>
     </div>
-    <div id="selected-book">
-      <img id="book-cover" src="" alt="Book Cover" style="display: none" />
-      <textarea
-        id="review-box"
-        placeholder="Write your review..."
-        style="display: none"
-      ></textarea>
-    </div>
+    <div id="selected-book-form">
+      <div id="selected-book">
+          <img id="book-cover" src="" alt="Book Cover" style="display: none" />
+          <textarea
+              id="review-box"
+              placeholder="Write your review..."
+              style="display: none"
+          ></textarea>
+          <button id="submit-review" style="display: none;">Submit Review</button>
+      </div>
+  </div>
 
     <script>
+      let selectedGoogleBookId = null;
+
         document.addEventListener("DOMContentLoaded", function () {
-            document.querySelector("#search-input")
-                .addEventListener("input", function () {
-                    const query = this.value.trim();
 
-                    // Clear the dropdown if the input is empty
-                    if (query.length === 0) {
-                        document.querySelector("#results-dropdown").innerHTML = "";
-                        return;
-                    }
+document.querySelector("#search-input")
+    .addEventListener("input", function () {
+        const query = this.value.trim();
 
-                    fetch(`https://www.googleapis.com/books/v1/volumes?q=${query}&key=AIzaSyBhwpZmk-SM4Ex_AGk4twmgIUHGNWrrYNg`)
-                        .then((response) => response.json())
-                        .then((data) => {
-                            let resultHTML = "";
-                            if (data.items) {
-                                data.items.forEach((item) => {
-                                    const book = item.volumeInfo;
-                                    const coverImage = book.imageLinks?.thumbnail;
-                                    resultHTML += `
-                                        <li data-cover="${coverImage}" class="book-item">
-                                            ${book.title} by ${book.authors?.join(", ")}
-                                        </li>`;
-                                });
-                            }
-                            document.querySelector("#results-dropdown").innerHTML = resultHTML;
-                        })
-                        .catch((error) => console.error("Error:", error));
+        // Clear the dropdown if the input is empty
+        if (query.length === 0) {
+            document.querySelector("#results-dropdown").innerHTML = "";
+            return;
+        }
 
-                });
+        fetch(`https://www.googleapis.com/books/v1/volumes?q=${query}&key=AIzaSyBhwpZmk-SM4Ex_AGk4twmgIUHGNWrrYNg`)
+            .then((response) => response.json())
+            .then((data) => {
+                let resultHTML = "";
+                if (data.items) {
+                    data.items.forEach((item) => {
+                        const book = item.volumeInfo;
+                        const coverImage = book.imageLinks?.medium || book.imageLinks?.small || book.imageLinks?.thumbnail;
 
-            // Event Delegation for selecting book
-            document.querySelector("#results-dropdown").addEventListener("click", function (event) {
-                if (event.target.classList.contains("book-item")) {
-                    const coverURL = event.target.getAttribute("data-cover");
-                    const bookCover = document.querySelector("#book-cover");
-                    const reviewBox = document.querySelector("#review-box");
-
-                    bookCover.src = coverURL || "default-image-path.jpg"; // Fallback to default image if coverURL is null
-                    bookCover.style.display = "block";
-                    reviewBox.style.display = "block";
+                        resultHTML += `
+   <li data-cover="${coverImage}" data-google-book-id="${item.id}" class="book-item">
+       ${book.title} by ${book.authors?.join(", ")}
+   </li>`;
+                    });
                 }
-            });
+                document.querySelector("#results-dropdown").innerHTML = resultHTML;
+            })
+            .catch((error) => console.error("Error:", error));
+
+    });
+
+// Event Delegation for selecting book
+document.querySelector("#results-dropdown").addEventListener("click", function (event) {
+    if (event.target.classList.contains("book-item")) {
+        const coverURL = event.target.getAttribute("data-cover");
+        const bookCover = document.querySelector("#book-cover");
+        const reviewBox = document.querySelector("#review-box");
+        const submitReviewBtn = document.querySelector("#submit-review"); // Define this variable here
+
+        bookCover.src = coverURL || "default-image-path.jpg"; // Fallback to default image if coverURL is null
+        bookCover.style.display = "block";
+        reviewBox.style.display = "block";
+
+     
+
+
+         // Check textarea content and decide whether to show the submit button
+         reviewBox.addEventListener("input", function() {
+            if (reviewBox.value.trim().length > 0) {
+                submitReviewBtn.style.display = "block";
+            } else {
+                submitReviewBtn.style.display = "none";
+            }
         });
+        selectedGoogleBookId = event.target.getAttribute("data-google-book-id");
+    }
+});
+
+document.querySelector("#submit-review").addEventListener("click", function () {
+    // Fetch necessary details
+    const reviewContent = document.querySelector("#review-box").value;
+
+    // Check if we have a selectedGoogleBookId
+    if (!selectedGoogleBookId) {
+        alert("Please select a book before submitting a review.");
+        return;
+    }
+
+    // Send the details to the Flask endpoint
+    fetch("/submitReview", {
+        method: "POST",
+        body: JSON.stringify({
+            google_book_id: selectedGoogleBookId,
+            review: reviewContent
+        }),
+        headers: {
+            "Content-Type": "application/json"
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            alert("Review successfully added!");
+        } else {
+            alert(data.message || "There was an error submitting your review.");
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert("There was an error submitting your review.");
+    });
+});
+
+
+});
+
     </script> 
 </html>
