@@ -31,17 +31,31 @@
     <script>
       document.addEventListener("DOMContentLoaded", function () {
         // Fetch the user's reviews from the server and display them
-        fetch("getReviews.php")
-          .then((response) => response.json())
+        fetch("/getReviews")
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error("Network response was not ok");
+            }
+            return response.json();
+          })
           .then((data) => {
-            const gridContainer = document.querySelector("#grid-container");
+            const gridItems = document.querySelectorAll(".grid-item");
 
-            data.reviews.forEach((review) => {
-              const newCover = document.createElement("img");
-              newCover.src = review.cover;
-              newCover.alt = "Reviewed Book Cover";
-              gridContainer.appendChild(newCover);
+            data.reviews.forEach((review, index) => {
+              if (gridItems[index]) {
+                // check if the grid item exists
+                const newCover = document.createElement("img");
+                newCover.src = review.cover;
+                console.log(review.cover); // console log to verify review cover data
+                newCover.alt = "Reviewed Book Cover";
+                newCover.style.width = "100%"; // Ensure image takes up the full grid item
+                newCover.style.height = "100%"; // Ensure image takes up the full grid item
+                gridItems[index].appendChild(newCover);
+              }
             });
+          })
+          .catch((error) => {
+            console.error("Error fetching reviews:", error);
           });
       });
     </script>

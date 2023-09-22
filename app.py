@@ -54,9 +54,11 @@ def fetch_book_details_from_google(book_id):
         'title': volume_info.get('title'),
         'author': ', '.join(volume_info.get('authors', [])),
         'description': volume_info.get('description', ''),
+        'cover_image': volume_info.get('imageLinks', {}).get('thumbnail', ''),  # Extracting the cover image URL
         # Add more fields as needed
     }
     return book_data
+
 
 db.init_app(app)
 
@@ -140,10 +142,8 @@ def review():
 @app.route('/profile')
 @login_required
 def user_profile():
-    # Assuming you have a relationship set up between User and Review
-    reviews = Review.query.filter_by(user_id=current_user.id).all()
-    read_books = {review.book for review in reviews}
-    return render_template('profile.html', read_books=read_books, reviews=reviews)
+    return render_template('profile.html')
+
 
 @app.route('/profile/<int:user_id>')
 def profile_by_id(user_id):
@@ -192,7 +192,8 @@ def save_book():
     new_book = Book(
         title=book_details['title'], 
         author=book_details['author'],
-        google_book_id=google_book_id
+        google_book_id=google_book_id,
+        cover_image=book_details['cover_image']  # Add the cover image attribute here
     )
     # Add other details as necessary
     db.session.add(new_book)
@@ -200,6 +201,7 @@ def save_book():
 
     flash('Book added successfully!')
     return redirect(url_for('review'))
+
 
 
 
@@ -264,28 +266,49 @@ def search_books_route():
 @login_required
 def submit_review():
     data = request.get_json()
-    
-    # Extract google_book_id and review content from the received data
-    google_book_id_from_request = data.get('google_book_id')
+
     review_content = data.get('review')
-    
-    # Print the received google_book_id for debugging purposes
-    print(f"Received google_book_id: {google_book_id_from_request}")
+    google_book_id_from_request = data.get('google_book_id').strip()
 
-    # Check if the book exists in the database using the received google_book_id
+    # Check if book exists in the database by google_book_id
     book = Book.query.filter_by(google_book_id=google_book_id_from_request).first()
-    
-    # If the book is not found in the database, print a message and return a 400 error
-    if not book:
-        print(f"No book found with google_book_id: {google_book_id_from_request}")
-        return jsonify({"success": False, "message": "Book not found!"}), 400
 
-    # Create a new review for the found book
+    # If the book doesn't exist in the database, fetch its details from Google Books and then create a new entry
+    if not book:
+        book_details = fetch_book_details_from_google(google_book_id_from_request)
+        if not book_details:
+            return jsonify({"success": False, "message": "Error fetching book details from Google Books."})
+
+        book = Book(
+            title=book_details['title'], 
+            author=book_details['author'],
+            google_book_id=google_book_id_from_request,
+            cover_image=book_details['cover_image']  # Add the cover image attribute here
+        )
+        db.session.add(book)
+        db.session.flush()  # To get the id of the newly created book
+
+    # Create a new review
     review = Review(content=review_content, user_id=current_user.id, book_id=book.id)
     db.session.add(review)
     db.session.commit()
 
     return jsonify({"success": True, "message": "Review successfully added!"})
+
+
+
+@app.route('/getReviews')
+@login_required
+def get_user_reviews():
+    reviews = Review.query.filter_by(user_id=current_user.id).all()
+    
+    # Convert the reviews into the expected format
+    reviews_data = [{"cover": review.book.cover_image if review.book.cover_image else "path_to_default_image.jpg"} for review in reviews]
+
+
+    return jsonify({"reviews": reviews_data})
+
+
 
 
 

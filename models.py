@@ -48,6 +48,7 @@ class Book(db.Model):
     author = db.Column(db.String(200), nullable=False)
     reviews = db.relationship('Review', backref='book', lazy=True)
     google_book_id = db.Column(db.String(200), nullable=True, unique=True)
+    cover_image = db.Column(db.String(500), nullable=True)
 
     def serialize(self):
         return {
@@ -62,9 +63,7 @@ class Review(db.Model):
     content = db.Column(db.Text, nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     book_id = db.Column(db.Integer, db.ForeignKey('book.id'), nullable=False)
-    rating = db.Column(db.Integer, nullable=False)
-    text = db.Column(db.Text, nullable=False)
-
+   
     def serialize(self):
         return {
             "id": self.id,
