@@ -8,9 +8,42 @@
       /* Container for the grid */
       .grid-container {
         display: grid;
-        grid-template-columns: repeat(3, 100px);
+        grid-template-columns: repeat(
+          3,
+          500px
+        ); /* Make this match grid-item dimensions */
         grid-gap: 10px;
         justify-content: center;
+      }
+
+      .btn-group {
+        display: none; /* Hide buttons by default */
+        position: absolute; /* Positioning the buttons within the grid item */
+        bottom: 10px; /* Position from the bottom */
+        left: 50%; /* Centering the button group */
+        transform: translateX(
+          -50%
+        ); /* This, combined with left:50%, centers the group */
+      }
+
+      .view-btn,
+      .remove-btn {
+        padding: 5px 10px;
+        margin: 5px;
+        cursor: pointer; /* Makes the button appear clickable */
+      }
+
+      .grid-item:hover .btn-group {
+        display: block; /* Show buttons on hover */
+      }
+
+      /* Modify the grid-item to relative to position the buttons inside it */
+      .grid-item {
+        position: relative;
+        width: 500px;
+        height: 500px;
+        border: 1px solid black;
+        background-color: #f4f4f4;
       }
 
       /* Each square item */
@@ -18,7 +51,7 @@
         width: 500px;
         height: 500px;
         border: 1px solid black;
-        background-color: #f4f4f4; /* light gray background */
+        background-color: #f4f4f4;
       }
 
       .header {
@@ -30,7 +63,64 @@
 
     <script>
       document.addEventListener("DOMContentLoaded", function () {
-        // Fetch the user's reviews from the server and display them
+        // Helper function to create and return the button group for each review
+        function createButtonGroup(review, gridItem) {
+          const btnGroup = document.createElement("div");
+          btnGroup.classList.add("btn-group");
+
+          const viewButton = document.createElement("button");
+          viewButton.innerText = "View";
+          viewButton.classList.add("view-btn");
+          btnGroup.appendChild(viewButton);
+
+          const removeButton = document.createElement("button");
+          removeButton.innerText = "Remove";
+          removeButton.classList.add("remove-btn");
+          console.log("Setting reviewId:", review.id);
+          removeButton.dataset.reviewId = review.id; // Ensure review.id is valid here
+          btnGroup.appendChild(removeButton);
+
+          // Add event listener for the remove button
+          removeButton.addEventListener("click", function (event) {
+            console.log("Button dataset:", event.target.dataset);
+            const reviewId = event.target.dataset.reviewId;
+            console.log("Clicked reviewId:", reviewId);
+
+            if (!reviewId) {
+              console.error("Review ID is missing or undefined.");
+              return;
+            }
+            fetch("/deleteReview", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ id: reviewId }),
+            })
+              .then((response) => {
+                if (!response.ok) {
+                  throw new Error("Network response was not ok");
+                }
+                return response.json();
+              })
+              .then((data) => {
+                if (data.success) {
+                  while (gridItem.firstChild) {
+                    gridItem.removeChild(gridItem.firstChild);
+                  }
+                } else {
+                  console.error("Error removing review:", data.error);
+                }
+              })
+              .catch((error) => {
+                console.error("Error removing review:", error);
+              });
+          });
+
+          return btnGroup;
+        }
+
+        // Fetch reviews from the server
         fetch("/getReviews")
           .then((response) => {
             if (!response.ok) {
@@ -43,14 +133,16 @@
 
             data.reviews.forEach((review, index) => {
               if (gridItems[index]) {
-                // check if the grid item exists
                 const newCover = document.createElement("img");
                 newCover.src = review.cover;
-                console.log(review.cover); // console log to verify review cover data
                 newCover.alt = "Reviewed Book Cover";
-                newCover.style.width = "100%"; // Ensure image takes up the full grid item
-                newCover.style.height = "100%"; // Ensure image takes up the full grid item
+                newCover.style.width = "100%";
+                newCover.style.height = "100%";
                 gridItems[index].appendChild(newCover);
+
+                // Create and append the button group
+                const btnGroup = createButtonGroup(review, gridItems[index]);
+                gridItems[index].appendChild(btnGroup);
               }
             });
           })
@@ -62,7 +154,7 @@
   </head>
 
   <body>
-    <div id="header">
+    <div class="header">
       <h1>Books Reviewed</h1>
     </div>
 

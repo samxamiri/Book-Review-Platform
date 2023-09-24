@@ -302,13 +302,30 @@ def submit_review():
 def get_user_reviews():
     reviews = Review.query.filter_by(user_id=current_user.id).all()
     
-    # Convert the reviews into the expected format
-    reviews_data = [{"cover": review.book.cover_image if review.book.cover_image else "path_to_default_image.jpg"} for review in reviews]
-
+    reviews_data = [{
+    "id": review.id, 
+    "cover": review.book.cover_image if review.book.cover_image else "path_to_default_image.jpg"
+} for review in reviews]
 
     return jsonify({"reviews": reviews_data})
 
+@app.route('/deleteReview', methods=['POST'])
+def delete_review():
+    review_id = request.json.get('id')
+    print(review_id)
 
+    if remove_review(review_id):
+        return jsonify(success=True)
+    else:
+        return jsonify(success=False, error="Error removing review"), 400
+    
+def remove_review(review_id):
+    review = Review.query.get(review_id)  # assuming your model name is Review
+    if review:
+        db.session.delete(review)
+        db.session.commit()
+        return True
+    return False
 
 
 
