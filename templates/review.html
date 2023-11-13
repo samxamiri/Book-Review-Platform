@@ -21,13 +21,29 @@
             background-color: #f7f7f7;
         }
 
-        #book-cover {
-    width: 300px; /* Adjust this as needed */
-    height: auto; /* Keep this as auto to maintain aspect ratio */
-    margin-top: 20px; /* Optional: adds some space between the search bar and the image */
-    border: 1px solid #ddd; /* Optional: adds a light border around the image */
-}
+        #selected-book {
+        display: flex;
+        gap: 20px; /* Adds space between the textarea and the image */
+        }
 
+        #review-box {
+        display: none;
+        width: 100%; /* Makes the textarea take up all the available width */
+        height: 300px; /* Adjust this value as needed to make the textarea bigger */
+        margin-right: 20px; /* Optional: adds some space between the textarea and the image */
+        }
+
+        #book-cover {
+        display: none;        
+        width: 300px; /* Adjust this as needed */
+        height: auto; /* Keep this as auto to maintain aspect ratio */
+        margin-top: 20px; /* Optional: adds some space between the search bar and the image */
+        border: 1px solid #ddd; /* Optional: adds a light border around the image */
+        }
+        #submit-review{
+            display: none;
+        }
+    
     </style>
 </head>
 <body>
@@ -36,16 +52,15 @@
       <div id="results-dropdown" class="results-dropdown"></div>
     </div>
     <div id="selected-book-form">
-      <div id="selected-book">
-          <img id="book-cover" src="" alt="Book Cover" style="display: none" />
-          <textarea
-              id="review-box"
-              placeholder="Write your review..."
-              style="display: none"
-          ></textarea>
-          <button id="submit-review" style="display: none;">Submit Review</button>
-      </div>
-  </div>
+        <div id="selected-book" style="display: flex; align-items: flex-start;">
+            <div style="flex-grow: 1;">
+                <textarea id="review-box" placeholder="Write your review..."></textarea>
+                <button id="submit-review">Submit Review</button>
+            </div>
+            <img id="book-cover" src="" alt="Book Cover" />
+        </div>
+    </div>
+    
 
     <script>
       let selectedGoogleBookId = null;
@@ -87,9 +102,16 @@ document.querySelector("#search-input")
 document.querySelector("#results-dropdown").addEventListener("click", function (event) {
     if (event.target.classList.contains("book-item")) {
         const coverURL = event.target.getAttribute("data-cover");
+
         const bookCover = document.querySelector("#book-cover");
+        bookCover.src = coverURL || "default-image-path.jpg"; // set this to the selected book's cover image URL
+        bookCover.style.display = "block";
+
         const reviewBox = document.querySelector("#review-box");
+        reviewBox.style.display="block";
+
         const submitReviewBtn = document.querySelector("#submit-review"); // Define this variable here
+        submitReviewBtn.style.display='block';
 
         bookCover.src = coverURL || "default-image-path.jpg"; // Fallback to default image if coverURL is null
         bookCover.style.display = "block";
@@ -148,6 +170,21 @@ document.querySelector("#submit-review").addEventListener("click", function () {
         console.error('Error:', error);
         alert("There was an error submitting your review.");
     });
+
+     // After submitting the review, hide the elements
+     const bookCover = document.querySelector("#book-cover");
+    const reviewBox = document.querySelector("#review-box");
+    const submitReviewBtn = document.querySelector("#submit-review");
+
+    bookCover.style.display = "none";
+    reviewBox.style.display = "none";
+    submitReviewBtn.style.display = "none";
+
+    // Optionally, clear the text in the review box
+    reviewBox.value = '';
+
+    // Handle other actions after review submission, like showing a confirmation message, etc.
+    
 });
 
 
