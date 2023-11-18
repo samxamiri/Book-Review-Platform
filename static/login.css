@@ -1,0 +1,6 @@
+.rectangle {
+  width: 200px;      /* Width of the rectangle */
+  height: 100px;     /* Height of the rectangle */
+  background-color: blue; /* Background color */
+  border: 2px solid black; /* Optional: border */
+}

@@ -4,62 +4,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>3x3 Grid</title>
-    <style>
-      /* Container for the grid */
-      .grid-container {
-        display: grid;
-        grid-template-columns: repeat(
-          3,
-          500px
-        ); /* Make this match grid-item dimensions */
-        grid-gap: 10px;
-        justify-content: center;
-      }
-
-      .btn-group {
-        display: none; /* Hide buttons by default */
-        position: absolute; /* Positioning the buttons within the grid item */
-        bottom: 10px; /* Position from the bottom */
-        left: 50%; /* Centering the button group */
-        transform: translateX(
-          -50%
-        ); /* This, combined with left:50%, centers the group */
-      }
-
-      .view-btn,
-      .remove-btn {
-        padding: 5px 10px;
-        margin: 5px;
-        cursor: pointer; /* Makes the button appear clickable */
-      }
-
-      .grid-item:hover .btn-group {
-        display: block; /* Show buttons on hover */
-      }
-
-      /* Modify the grid-item to relative to position the buttons inside it */
-      .grid-item {
-        position: relative;
-        width: 500px;
-        height: 500px;
-        border: 1px solid black;
-        background-color: #f4f4f4;
-      }
-
-      /* Each square item */
-      .grid-item {
-        width: 500px;
-        height: 500px;
-        border: 1px solid black;
-        background-color: #f4f4f4;
-      }
-
-      .header {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-      }
-    </style>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='profile.css') }}"/>
+    
 
     <script>
       document.addEventListener("DOMContentLoaded", function () {
@@ -154,6 +100,8 @@
   </head>
 
   <body>
+
+    <button>Home</button>
     <div class="header">
       <h1>Books Reviewed</h1>
     </div>
